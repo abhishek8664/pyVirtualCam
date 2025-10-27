@@ -213,10 +213,10 @@ class RtspCamApp(tk.Tk):
         if pswd is None:          # user cancelled
             return
 
+        # only way to remove is modprobe -r v4l2loopback, cant add multiple devices after loading
         # ----  using -S to read password from stdin --
         cmd = (
-            f"sudo -S modprobe v4l2loopback "
-            f"video_nr={dev_num} Camera_label={label_quoted} exclusive_caps=1"
+            f"sudo -S modprobe v4l2loopback devices=1 video_nr={dev_num} card_label=\"{label_quoted}\" exclusive_caps=1"
         )
         self._append_log(f"$ {cmd}\n")
 
@@ -231,8 +231,8 @@ class RtspCamApp(tk.Tk):
                     text=True,
                 )
                 if result.returncode == 0:
-                    self.dev_path_var.set(dev_path)
-                    self._append_log(f"Device created: {dev_path}\n")
+                    # self.dev_path_var.set(dev_path)
+                    self._append_log(f"Device created: /dev/video{dev_num}\n")
                     self._update_register_button_state()
                 else:
                     self._append_log(
@@ -252,6 +252,7 @@ class RtspCamApp(tk.Tk):
                 shell=True,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
+                preexec_fn=os.setsid,
                 text=True,
                 bufsize=1,
             )
@@ -294,11 +295,12 @@ class RtspCamApp(tk.Tk):
         if self.proc and self.proc.poll() is None:
             self._append_log("\n--- stopping pipeline (SIGINT) ---\n")
             try:
-                self.proc.send_signal(signal.SIGINT)
+                # self.proc.send_signal(signal.SIGINT)
+                os.killpg(self.proc.pid, signal.SIGINT)
                 self.proc.wait(timeout=3)
             except subprocess.TimeoutExpired:
                 self._append_log("Process did not exit, sending SIGKILL...\n")
-                self.proc.kill()
+                os.killpg(self.proc.pid, signal.SIGKILL)
                 self.proc.wait()
         self._finalize_pipeline()
 
