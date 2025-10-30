@@ -27,7 +27,8 @@ class RtspCamApp(tk.Tk):
         # General background / foreground
         dark_bg   = "#2b2b2b"
         dark_fg   = "#e0e0e0"
-        accent    = "#4a90e2"   # button/selection accent
+        # button/selection accent
+        accent    = "#4a90e2"   
         entry_bg  = "#3c3f41"
         entry_fg  = "#ffffff"
         border    = "#555555"
@@ -36,7 +37,7 @@ class RtspCamApp(tk.Tk):
         self.configure(background=dark_bg)
 
         # ----- ttk widget colours ------------------------------------------------
-        style.configure(".",                     # default for all ttk widgets
+        style.configure(".",
                         background=dark_bg,
                         foreground=dark_fg,
                         bordercolor=border,
@@ -122,16 +123,16 @@ class RtspCamApp(tk.Tk):
         self.register_btn.grid(row=1, column=4, sticky="w", pady=4)
 
 
-        # When the device number changes, update whether registration is allowed
+        # When the device number changes, updates whether registration is allowed
         try:
             self.dev_num_var.trace_add("write", lambda *a: self._update_register_button_state())
         except Exception:
             self.dev_num_var.trace_add("w", lambda *a: self._update_register_button_state())
 
-        # Initialize register button state based on whether device exists
+        # Initializes register button state based on whether device exists
         self._update_register_button_state()
 
-        # Make sure the window and the first entry can receive keyboard focus
+        # Makes sure the window and the first entry can receive keyboard focus
         try:
             self.focus_force()
             self.url_entry.focus_set()
@@ -233,7 +234,6 @@ class RtspCamApp(tk.Tk):
                     text=True,
                 )
                 if result.returncode == 0:
-                    # self.dev_path_var.set(dev_path)
                     self._append_log(f"Device created: /dev/video{dev_num}\n")
                     self._update_register_button_state()
                 else:
@@ -271,6 +271,7 @@ class RtspCamApp(tk.Tk):
         self.start_btn.configure(state="normal")
         self.stop_btn.configure(state="disabled")
         self._append_log("\n--- pipeline terminated ---\n")
+        self.log.see(tk.END)
 
     # -----------------------------------------------------------------
     def start_pipeline(self):
