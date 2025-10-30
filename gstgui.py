@@ -14,6 +14,7 @@ class RtspCamApp(tk.Tk):
         self._build_ui()
         self._make_window_draggable()
         self._apply_dark_theme()
+        self.protocol("WM_DELETE_WINDOW", self._on_close)
         # ttk.Style().theme_use("clam")
     
         # theme helper ----------------------------------------------------------- 
@@ -55,16 +56,17 @@ class RtspCamApp(tk.Tk):
         # Labels (including ScrolledText label)
         style.configure("TLabel", background=dark_bg, foreground=dark_fg)
 
-        # Entry / Spinbox
+        # Entry 
         style.configure("TEntry",
                         fieldbackground=entry_bg,
                         foreground=entry_fg,
-                        padding=3)
+                        padding=3, insertcolor=entry_fg)
 
+        # Spinbox
         style.configure("TSpinbox",
                         fieldbackground=entry_bg,
                         foreground=entry_fg,
-                        padding=3)
+                        padding=3, insertcolor=entry_fg)
 
         # Scrollbar
         style.configure("Vertical.TScrollbar",
@@ -284,7 +286,7 @@ class RtspCamApp(tk.Tk):
             return
 
         gst_cmd = (
-            f"gst-launch-1.0 -e rtspsrc location={url} latency=0 protocols=tcp name=src ! rtpjitterbuffer ! decodebin ! videoconvert ! video/x-raw,format=YUY2 ! v4l2sink device={dev} sync=false"
+            f"gst-launch-1.0 -e rtspsrc location={url} latency=0 protocols=tcp name=src ! rtpjitterbuffer ! decodebin ! videoconvert ! v4l2sink device={dev} sync=false"
         )
         self.start_btn.configure(state="disabled")
         self.stop_btn.configure(state="normal")
@@ -305,7 +307,7 @@ class RtspCamApp(tk.Tk):
         self._finalize_pipeline()
 
     # -----------------------------------------------------------------
-    def on_close(self):
+    def _on_close(self):
         self.stop_pipeline()
         self.destroy()
 
